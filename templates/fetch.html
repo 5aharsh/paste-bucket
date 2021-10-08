@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>View Code</title>
+		<style>
+			#container{
+				background: linear-gradient(180deg, #e3f8fa, 0, #e3f8fa 1.6em, #fff 0);
+				background-size:3.2em 3.2em;
+				background-origin: content-box;
+				border-left: 10px solid #ddd;
+				counter-reset: line;
+				font-family: consolas;
+				font-size: 15px;
+				line-height: 1.6em;
+				margin: 20px auto;
+				overflow-x: scroll;
+				padding: 0 5px;
+				text-align: left;
+				white-space: pre;
+				width: 800px;
+			}
+
+			#container span{
+				display: block;
+			}
+
+			#container span:before {
+				counter-increment: line;
+				content: counter(line);
+				margin-right: .5em;
+				border-right: 1px solid #ddd;
+				padding: 0 .5em;
+				display: inline-block;
+				color: #888;
+			}
+
+		</style>
+	</head>
+	<body>
+		<center>
+			<form>
+				<input type="text" name="user" placeholder="username" id="username" value="guywhogeek">
+				<input type="text" name="file" placeholder="file name" id="filename" value="big_file.txt">
+				<input type="button" value="Fetch" id="show-btn">
+			</form>
+
+			<div id="container" style="display: none;">Loading...</div>
+		</center>
+
+		<script>
+			function displayCode(str){
+				return "<span>"+str.replace(/&/g, '&amp;').replace(/>/g, '&gt;').replace(/</g, '&lt;').replace(/'/g, '&quot;').replace(/\n/g, '</span><span>')+"</span>";
+			}
+
+			document.querySelector("#show-btn").addEventListener("click", function(){
+				var username = document.querySelector("#username").value;
+				var filename = document.querySelector("#filename").value;
+
+				document.querySelector("#container").style.display="block";
+				var xhr = new XMLHttpRequest();
+				xhr.open("get", "http://localhost:5000/fetch/"+username+"/"+filename, true);
+				xhr.send();
+				xhr.onreadystatechange = function(){
+					if(xhr.status==200 && xhr.readyState==4){
+						var res = xhr.responseText;
+                        if(res.length<1024*1024*11)
+						    document.querySelector("#container").innerHTML=displayCode(res);
+                        else
+                            document.querySelector("#container").innerHTML="Document too big";
+					}
+					if(xhr.status==404){
+						document.querySelector("#container").innerHTML="Document doesn't exist";
+					}
+				};
+			});
+		</script>
+	</body>
+</html>

@@ -1,0 +1,6 @@
+shutil has many methods you can use. One of which is:
+
+from shutil import copyfile
+
+copyfile(src, dst)
+Copy the contents of the file named src to a file named dst. The destination location must be writable; otherwise, an IOError exception will be raised. If dst already exists, it will be replaced. Special files such as character or block devices and pipes cannot be copied with this function. src and dst are path names given as strings.
