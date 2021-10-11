@@ -49,6 +49,7 @@
 
 		<script>
 			function displayCode(str){
+                console.log("writing...");
 				return "<span>"+str.replace(/&/g, '&amp;').replace(/>/g, '&gt;').replace(/</g, '&lt;').replace(/'/g, '&quot;').replace(/\n/g, '</span><span>')+"</span>";
 			}
 
@@ -57,21 +58,44 @@
 				var filename = document.querySelector("#filename").value;
 
 				document.querySelector("#container").style.display="block";
-				var xhr = new XMLHttpRequest();
-				xhr.open("get", "http://localhost:5000/fetch/"+username+"/"+filename, true);
-				xhr.send();
-				xhr.onreadystatechange = function(){
-					if(xhr.status==200 && xhr.readyState==4){
-						var res = xhr.responseText;
-                        if(res.length<1024*1024*11)
-						    document.querySelector("#container").innerHTML=displayCode(res);
-                        else
-                            document.querySelector("#container").innerHTML="Document too big";
-					}
-					if(xhr.status==404){
-						document.querySelector("#container").innerHTML="Document doesn't exist";
-					}
-				};
+
+                const consume = responseReader => {
+                    return responseReader.read().then(result => {
+                        if (result.done) { return; }
+
+                        // do something with the current chunk
+                        const chunk = result.value;
+                        console.log(chunk);
+                        //document.querySelector("#container").insertAdjacentHTML("beforeend", displayCode(chunk));
+                        return consume(responseReader);
+                    });
+                }
+
+
+                fetch("http://localhost:5000/fetch/"+username+"/"+filename).then(response => {
+                    //return consume(response.body.getReader());
+                    response.text().then(text=>{
+                        document.querySelector("#container").innerHTML=displayCode(text);
+                    })
+                })
+                .catch(console.log.bind(console));
+
+
+				// var xhr = new XMLHttpRequest();
+				// xhr.open("get", "http://localhost:5000/fetch/"+username+"/"+filename, true);
+				// xhr.send();
+				// xhr.onreadystatechange = function(){
+				// 	if(xhr.status==200 && xhr.readyState==4){
+				// 		var res = xhr.responseText;
+                //         if(res.length<1024*1024*11)
+				// 		    document.querySelector("#container").innerHTML=displayCode(res);
+                //         else
+                //             document.querySelector("#container").innerHTML="Document too big";
+				// 	}
+				// 	if(xhr.status==404){
+				// 		document.querySelector("#container").innerHTML="Document doesn't exist";
+				// 	}
+				// };
 			});
 		</script>
 	</body>
