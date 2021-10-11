@@ -74,9 +74,16 @@
 
                 fetch("http://localhost:5000/fetch/"+username+"/"+filename).then(response => {
                     //return consume(response.body.getReader());
-                    response.text().then(text=>{
-                        document.querySelector("#container").innerHTML=displayCode(text);
-                    })
+                    if(response.status==200){
+                        response.text().then(text=>{
+                            if(text.length<=1024*1024)
+                                document.querySelector("#container").innerHTML=displayCode(text);
+                            else
+                                document.querySelector("#container").innerHTML=displayCode(text.substring(0, 1024*1024)+"\n...");
+                        })
+                    } else {
+                        document.querySelector("#container").innerHTML="Document doesn't exist";
+                    }
                 })
                 .catch(console.log.bind(console));
 
